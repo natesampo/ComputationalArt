@@ -1,10 +1,36 @@
 """ TODO: Put your header comment here """
 
 import random
+import math
 from PIL import Image
 
 
-def build_random_function(min_depth, max_depth):
+def prod(f, x, y):
+    return evaluate_random_function(f[1], x, y) * evaluate_random_function(f[2], x, y)
+
+def avg(f, x, y):
+    return (evaluate_random_function(f[1], x, y) + evaluate_random_function(f[2], x, y)) / 2
+
+def cos_pi(f, x, y):
+    return math.cos(math.pi * evaluate_random_function(f[1], x, y))
+
+def sin_pi(f, x, y):
+    return math.sin(math.pi * evaluate_random_function(f[1], x, y))
+
+def first(x, y):
+    return x
+
+def second(x, y):
+    return y
+
+def power(f, x, y):
+    return evaluate_random_function(f[1], x, y) ** 3
+
+def neg(f, x, y):
+    return evaluate_random_function(f[1], x, y) * -1
+
+
+def build_random_function(f, min_depth, curr_depth, max_depth):
     """ Builds a random function of depth at least min_depth and depth
         at most max_depth (see assignment writeup for definition of depth
         in this context)
@@ -15,8 +41,46 @@ def build_random_function(min_depth, max_depth):
                  (see assignment writeup for details on the representation of
                  these functions)
     """
-    # TODO: implement this
-    pass
+    if curr_depth < max_depth:
+        if curr_depth < min_depth:
+            r = random.randint(1,6)
+            if r == 1:
+                f = ['prod', build_random_function(f, min_depth, curr_depth + 1, max_depth), build_random_function(f, min_depth, curr_depth + 1, max_depth)]
+            if r == 2:
+                f = ['avg', build_random_function(f, min_depth, curr_depth + 1, max_depth), build_random_function(f, min_depth, curr_depth + 1, max_depth)]
+            if r == 3:
+                f = ['power', build_random_function(f, min_depth, curr_depth + 1, max_depth)]
+            if r == 4:
+                f = ['neg', build_random_function(f, min_depth, curr_depth + 1, max_depth)]
+            if r == 5:
+                f = ['cos_pi', build_random_function(f, min_depth, curr_depth + 1, max_depth)]
+            if r == 6:
+                f = ['sin_pi', build_random_function(f, min_depth, curr_depth + 1, max_depth)]
+        else:
+            r = random.randint(1,7)
+            if r == 1:
+                f = ['prod', build_random_function(f, min_depth, curr_depth + 1, max_depth), build_random_function(f, min_depth, curr_depth + 1, max_depth)]
+            if r == 2:
+                f = ['avg', build_random_function(f, min_depth, curr_depth + 1, max_depth), build_random_function(f, min_depth, curr_depth + 1, max_depth)]
+            if r == 3:
+                f = ['power', build_random_function(f, min_depth, curr_depth + 1, max_depth)]
+            if r == 4:
+                f = ['neg', build_random_function(f, min_depth, curr_depth + 1, max_depth)]
+            if r == 5:
+                f = ['cos_pi', build_random_function(f, min_depth, curr_depth + 1, max_depth)]
+            if r == 6:
+                f = ['sin_pi', build_random_function(f, min_depth, curr_depth + 1, max_depth)]
+            if r == 7:
+                f = ['x']
+            if r == 8:
+                f = ['y']
+    else:
+        r = random.randint(1,2)
+        if r == 1:
+            f = ['x']
+        if r == 2:
+            f = ['y']
+    return f
 
 
 def evaluate_random_function(f, x, y):
@@ -28,13 +92,14 @@ def evaluate_random_function(f, x, y):
         y: the value of y to be used to evaluate the function
         returns: the function value
 
-        >>> evaluate_random_function(["x"],-0.5, 0.75)
+        >>> evaluate_random_function(['x'],-0.5, 0.75)
         -0.5
-        >>> evaluate_random_function(["y"],0.1,0.02)
+        >>> evaluate_random_function(['y'],0.1,0.02)
         0.02
     """
-    # TODO: implement this
-    pass
+    function_dict = {'prod':prod, 'avg':avg, 'cos_pi':cos_pi, 'sin_pi':sin_pi, 'x':first, 'y':second, 'power':power, 'neg':neg}
+    argument_dict = {'prod':(f,x,y), 'avg':(f,x,y), 'cos_pi':(f,x,y), 'sin_pi':(f,x,y), 'x':(x,y), 'y':(x,y), 'power':(f,x,y), 'neg':(f,x,y)}
+    return function_dict[f[0]](*argument_dict[f[0]])
 
 
 def remap_interval(val,
@@ -64,8 +129,10 @@ def remap_interval(val,
         >>> remap_interval(5, 4, 6, 1, 2)
         1.5
     """
-    # TODO: implement this
-    pass
+    if val != input_interval_end:
+        return (output_interval_end - output_interval_start) * ((val - input_interval_start) / (input_interval_end - input_interval_start)) + output_interval_start
+    else:
+        return output_interval_end
 
 
 def color_map(val):
@@ -116,9 +183,9 @@ def generate_art(filename, x_size=350, y_size=350):
         x_size, y_size: optional args to set image dimensions (default: 350)
     """
     # Functions for red, green, and blue channels - where the magic happens!
-    red_function = ["x"]
-    green_function = ["y"]
-    blue_function = ["x"]
+    red_function = build_random_function([], 7, 0, 9)
+    green_function = build_random_function([], 7, 0, 9)
+    blue_function = build_random_function([], 7, 0, 9)
 
     # Create image and loop over all pixels
     im = Image.new("RGB", (x_size, y_size))
@@ -137,14 +204,6 @@ def generate_art(filename, x_size=350, y_size=350):
 
 
 if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
-
-    # Create some computational art!
-    # TODO: Un-comment the generate_art function call after you
-    #       implement remap_interval and evaluate_random_function
-    # generate_art("myart.png")
-
-    # Test that PIL is installed correctly
-    # TODO: Comment or remove this function call after testing PIL install
-    test_image("noise.png")
+    #import doctest
+    #doctest.testmod()
+    generate_art("myart.png")
